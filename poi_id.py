@@ -2,7 +2,8 @@
 
 import sys
 import pickle
-sys.path.append("../tools/")
+#sys.path.append("../tools/")
+sys.path.append("./tools/") # use local folder due to github repo
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data

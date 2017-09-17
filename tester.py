@@ -13,7 +13,8 @@
 import pickle
 import sys
 from sklearn.cross_validation import StratifiedShuffleSplit
-sys.path.append("../tools/")
+#sys.path.append("../tools/")
+sys.path.append("./tools/") # use local folder due to github repo
 from feature_format import featureFormat, targetFeatureSplit
 
 PERF_FORMAT_STRING = "\

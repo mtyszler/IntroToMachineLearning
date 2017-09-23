@@ -11,7 +11,10 @@ from tester import dump_classifier_and_data
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi','salary'] # You will need to use more features
+features_list = ['poi', 'exercised_stock_options',
+                 'restricted_stock', 'shared_receipt_with_poi',
+                 'expenses', 'other', 'from_poi_to_this_person',
+                 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi'] # You will need to use more features
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -20,7 +23,22 @@ with open("final_project_dataset.pkl", "r") as data_file:
 ### Task 2: Remove outliers
 data_dict.pop('TOTAL',0)
 data_dict.pop('THE TRAVEL AGENCY IN THE PARK',0)
+data_dict.pop('LOCKHART EUGENE E',0)
 ### Task 3: Create new feature(s)
+def convert_to_share(data, abs_var_name, base_var_name, new_var_name):
+    for person in data.keys():
+        if data[person][abs_var_name] == "NaN" or data[person][base_var_name] == "NaN":
+            data[person][new_var_name] = "NaN"
+        else:
+            data[person][new_var_name] = float(data[person][abs_var_name]) / float(data[person][base_var_name])
+
+    return data
+
+
+data_dict = convert_to_share(data_dict, 'shared_receipt_with_poi', 'to_messages', 'share_shared_receipt_with_poi')
+data_dict = convert_to_share(data_dict, 'from_this_person_to_poi', 'from_messages', 'share_from_this_person_to_poi')
+data_dict = convert_to_share(data_dict, 'from_poi_to_this_person', 'to_messages', 'share_from_poi_to_this_person')
+
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
 
@@ -29,27 +47,13 @@ data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 
 ### Task 4: Try a varity of classifiers
-### Please name your classifier clf for easy export below.
-### Note that if you want to do PCA or other multi-stage operations,
-### you'll need to use Pipelines. For more info:
-### http://scikit-learn.org/stable/modules/pipeline.html
-
-# Provided to give you a starting point. Try a variety of classifiers.
-from sklearn.naive_bayes import GaussianNB
-clf = GaussianNB()
-
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
-### using our testing script. Check the tester.py script in the final project
-### folder for details on the evaluation method, especially the test_classifier
-### function. Because of the small size of the dataset, the script uses
-### stratified shuffle split cross validation. For more info: 
-### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
-# Example starting point. Try investigating other evaluation techniques!
-#from sklearn.cross_validation import train_test_split
-from sklearn.model_selection import train_test_split
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
+## See Project notes for testing, comparisons and tuning
+## this is the best option:
+from sklearn.ensemble import AdaBoostClassifier
+clf = AdaBoostClassifier(learning_rate = 0.9, n_estimators = 15)
+
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure

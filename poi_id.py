@@ -11,10 +11,9 @@ from tester import dump_classifier_and_data
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi', 'exercised_stock_options',
-                 'restricted_stock', 'shared_receipt_with_poi',
-                 'expenses', 'other', 'from_poi_to_this_person',
-                 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi'] # You will need to use more features
+features_list = ['poi', 'exercised_stock_options', 'restricted_stock',
+                 'shared_receipt_with_poi', 'expenses', 'other',
+                 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -24,6 +23,7 @@ with open("final_project_dataset.pkl", "r") as data_file:
 data_dict.pop('TOTAL',0)
 data_dict.pop('THE TRAVEL AGENCY IN THE PARK',0)
 data_dict.pop('LOCKHART EUGENE E',0)
+
 ### Task 3: Create new feature(s)
 def convert_to_share(data, abs_var_name, base_var_name, new_var_name):
     for person in data.keys():
@@ -48,9 +48,9 @@ labels, features = targetFeatureSplit(data)
 
 ### Task 4: Try a varity of classifiers
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
-
 ## See Project notes for testing, comparisons and tuning
 ## this is the best option:
+
 from sklearn.ensemble import AdaBoostClassifier
 clf = AdaBoostClassifier(learning_rate = 0.9, n_estimators = 15)
 

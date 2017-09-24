@@ -15,7 +15,9 @@ It can take us up to a week to grade the project, but in most cases it is much f
 If you are having any problems submitting your project or wish to check on the status of your submission, please email us at dataanalyst-project@udacity.com.
 
 ### Items to include in submission:
+
 ####Code/Classifier
+
 When making your classifier, you will create three pickle files (my\_dataset.pkl, my\_classifier.pkl, my\_feature\_list.pkl). The project evaluator will test these using the tester.py script. You are encouraged to use this script before submitting to gauge if your performance is good enough. You should also include your modified poi_id.py file in case of any issues with running your code or to verify what is reported in your question responses (see next paragraph). Notably, we should be able to run poi_id.py to generate the three pickle files that reflect your final algorithm, without needing to modify the script in any way.
 
 If you have intermediate code that you would like to provide as supplemental materials, it is encouraged for you to save them in files separate from poi_id.py. If you do so, be sure to provide a readme file that explains what each file is for. If you used a Jupyter notebook to work on the project, make sure that your finished code is transferred to the poi_id.py script to generate your final work.

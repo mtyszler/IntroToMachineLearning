@@ -16,7 +16,7 @@ If you are having any problems submitting your project or wish to check on the s
 
 ### Items to include in submission:
 
-####Code/Classifier
+#### Code/Classifier
 
 When making your classifier, you will create three pickle files (my\_dataset.pkl, my\_classifier.pkl, my\_feature\_list.pkl). The project evaluator will test these using the tester.py script. You are encouraged to use this script before submitting to gauge if your performance is good enough. You should also include your modified poi_id.py file in case of any issues with running your code or to verify what is reported in your question responses (see next paragraph). Notably, we should be able to run poi_id.py to generate the three pickle files that reflect your final algorithm, without needing to modify the script in any way.
 

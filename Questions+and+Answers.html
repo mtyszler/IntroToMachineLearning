@@ -11782,6 +11782,9 @@ Once you’ve submitted your responses, your coach will take a look and may ask 
 <p>I spotted 3 keys that needed to tbe removed: <em>TOTAL</em> and <em>THE TRAVEL AGENCY IN THE PARK</em>. These keys are clearly not persons and will only disturb any analysis.</p>
 <p>I noticed also that <em>LOCKHART EUGENE E</em> has only 0s or <em>NaN</em> values, therefore he will also be removed. I opted to remove it manually, but this would not be stricly necessary if using <em>features_format</em> function since by default (option <em>remove_all_zeroes=True</em>) this person would be removed. However for consisteny and initial analysis, it is cleaner to do so.</p>
 <p>I also noitced that Kenneth Lay has a gigantic outliers value for <em>total payments</em> so I considered removing him or his value for total payments. However he is a real outlier and should be identified by the model. Therefore I did not do remove it.</p>
+<p>In further investigation using the Tukey's Inter Quartile Range method, I found that, as expected, <em>LAY KENNETH L</em> and <em>SKILLING JEFFREY K</em> show up often as outliers when looking feature by feature. However, a few new names are also there: <em>FREVERT MARK A</em>, <em>BELDEN TIMOTHY N</em>, <em>LAVORATO JOHN J</em>. As they all seem like real outliers, so I will keep them.</p>
+<p><em>DATA ERRORS</em></p>
+<p>In exploring the data I also noticed that 2 entries had errors, with one column shift: <em>BHATNAGAR SANJAY</em> and <em>BELFER ROBERT</em>. I noticed this since <em>BELFER ROBERT</em> had a negative value for a feature where no negative values should be expected. To find all problem cases I computed the <em>Total Payments</em> and <em>Total Stock Value</em> based on the other columns and compared to the original values. After finding the problem cases I manually typed the correct values based on the PDF.</p>
 
 </div>
 </div>
@@ -11813,50 +11816,72 @@ Once you’ve submitted your responses, your coach will take a look and may ask 
 <p>I decided to not do any re-scaling since I was not planning on using any classifier that was sensitive to that. In particular, my initial plan was to test and select among NaiveBayes, SVM, Decision Tree and Adaboost, which should not be sensitive to the scaling, except SVM. Therefore I decided to re-visit scaling only if I opted to further investigate SVM, which was not the case.</p>
 <p>After tuning and training it, the performance in the <em>tester.py</em> was:</p>
 
-<pre><code>Accuracy: 0.87187    Precision: 0.52664    Recall: 0.38550    F1: 0.44515    F2: 0.40733
+<pre><code>Accuracy: 0.87300    Precision: 0.53251    Recall: 0.38900    F1: 0.44958    F2: 0.41116
 
 </code></pre>
-<p>I compared with the performance after manually removing the 3 features with near 0 importance, but performace was reduced:</p>
+<p>I compared with the performance after manually removing the 3 features with near 0 importance, and re-tunning the model:</p>
+<p>features = ['poi', 'salary', 'total_payments', 'exercised_stock_options', 'bonus', 'restricted_stock', 'expenses', 'other', 'share_shared_receipt_with_poi']</p>
 
-<pre><code>Accuracy: 0.86840    Precision: 0.50866    Recall: 0.38200    F1: 0.43632    F2: 0.40202
+<pre><code>Accuracy: 0.88767    Precision: 0.63496    Recall: 0.37050    F1: 0.46795    F2: 0.40417
+
+</code></pre>
+<p>I attempted to remove an additional feature (<em>other</em>), but performance dropped in <em>Recall</em> and <em>F1</em>:</p>
+
+<pre><code>Accuracy: 0.89007    Precision: 0.66924    Recall: 0.34700    F1: 0.45703    F2: 0.38398
+
 
 
 </code></pre>
 <p><em>Second Process</em></p>
-<p>In the second process I opted to use recursive feature elimination (RFE) to select features. I started from all features, including the 3 additional computed features I created and used RFE to select the 11 best (since there where 11 features + poi in the process above).</p>
-<p>I tested these selection on the  <em>tester.py</em> and obtained clearly a superior performance. I noticed again that 3 features had near 0 importance, so I repeated the procedure with the 8 best features.</p>
+<p>In the second process I opted to use recursive feature elimination (RFE) to select features. I started from all features, including the 3 additional computed features I created and used RFE to select the 8 best (since there where 8 features + poi in the process above).</p>
+<p>I tested these selection on the  <em>tester.py</em> and obtained a superior performance.</p>
 <p>With the list:</p>
-<p>['poi', 'exercised_stock_options', 'restricted_stock', 'shared_receipt_with_poi', 'expenses', 'other', 'from_poi_to_this_person', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
-<p>Performance improved (slightly) again and was:</p>
+<p>['poi', 'total_payments', 'exercised_stock_options', 'bonus', 'restricted_stock', 'expenses', 'other', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
+<p>Performance was:</p>
 
-<pre><code>Accuracy: 0.87907    Precision: 0.56522    Recall: 0.40300    F1: 0.47052    F2: 0.42754
+<pre><code>Accuracy: 0.88933    Precision: 0.64912    Recall: 0.37000    F1: 0.47134    F2: 0.40481
 
 </code></pre>
-<p>I noticed again that 1 feature had near 0 performance, and tried to remove via RFE another feature, but performance dropped.</p>
-<p>Lastly I decided to manually remove the feature with near 0 performance (<em>from_poi_to_this_person</em>) and compare the performance.</p>
-<p>With the list:</p>
-<p>['poi', 'exercised_stock_options', 'restricted_stock', 'shared_receipt_with_poi', 'expenses', 'other', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
-<p>Performance improved and was:
-    Accuracy: 0.88780    Precision: 0.61444    Recall: 0.42550    F1: 0.50281    F2: 0.45338</p>
+<p>I noticed again that features had near 0 performance, and tried to remove via RFE another 2 features.</p>
+<p>With the list:
+['poi', 'exercised_stock_options', 'bonus', 'expenses', 'other', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
+<p>Performance was:</p>
+
+<pre><code>Accuracy: 0.88943    Precision: 0.72027    Recall: 0.36950    F1: 0.48843    F2: 0.40937
+
+</code></pre>
+<p>I re-tuned this model, obtaining:</p>
+
+<pre><code>Accuracy: 0.87736    Precision: 0.58408    Recall: 0.49150    F1: 0.53380    F2: 0.50759
+
+</code></pre>
+<p>I tried removing additional features via RFE or manually, but performance did not improve in the direction I wanted.</p>
 <p><em>Final selection</em></p>
-<p>I compared the best performing classifier from the two processes above and selected the best one, which was the 8 best features selected via RFE, removing the feature with near 0 importance.</p>
+<p>I compared the best performing classifier from the two processes above and selected the best one, which was the 6 best features selected via RFE.</p>
 <p><strong>List:</strong></p>
-<p>['poi', 'exercised_stock_options', 'restricted_stock', 'shared_receipt_with_poi', 'expenses', 'other', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
+<p>['poi', 'exercised_stock_options', 'bonus', 'expenses', 'other', 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']</p>
 <p><strong>Performance:</strong></p>
 
-<pre><code>Accuracy: 0.88780    Precision: 0.61444    Recall: 0.42550    F1: 0.50281    F2: 0.45338
+<pre><code>Accuracy: 0.87736    Precision: 0.58408    Recall: 0.49150    F1: 0.53380    F2: 0.5075
 
 </code></pre>
 <p><strong>Features importance:</strong></p>
 <ul>
-<li>exercised_stock_options: 0.13</li>
-<li>restricted_stock: 0.07</li>
-<li>shared_receipt_with_poi: 0.07</li>
-<li>expenses: 0.2</li>
-<li>other: 0.13</li>
-<li>share_shared_receipt_with_poi: 0.2</li>
-<li>share_from_this_person_to_poi: 0.2</li>
+<li>exercised_stock_options: 0.69</li>
+<li>bonus: 0.23</li>
+<li>expenses: 0.08</li>
+<li>other: 0.0</li>
+<li>share_shared_receipt_with_poi: 0.0</li>
+<li>share_from_this_person_to_poi: 0.0</li>
 </ul>
+<p>(even though there are some near 0 importances, removing then cleary reduced performance)</p>
+<p><strong> IMPACT OF CREATED FEATURES </strong>
+To check the impact of my created features, I computed the performance of the classifier without them.</p>
+<p>With the list:
+['poi', 'exercised_stock_options', 'bonus', 'expenses', 'other']</p>
+<p>Performance was:
+    Accuracy: 0.85186    Precision: 0.47068    Recall: 0.29700    F1: 0.36419    F2: 0.32067</p>
+<p>Which clearly shows the impact of my created features!</p>
 
 </div>
 </div>
@@ -11915,10 +11940,10 @@ Total predictions: 15000    True positives:  728    False positives:  907    Fal
 
 
 </code></pre>
-<p>Adaboost clearly had the superior performance, therefore I opted to drop the other ones and pursue tuning of Adaboost.</p>
+<p>Adaboost clearly had the superior performance, therefore I opted to drop the other ones and pursue tuning of Adaboost along side the selection of features.</p>
 <p>In the final model, as indicate in <em>QUESTION 2</em> performance was:</p>
 
-<pre><code>Accuracy: 0.88780    Precision: 0.61444    Recall: 0.42550    F1: 0.50281    F2: 0.45338</code></pre>
+<pre><code>Accuracy: 0.87736    Precision: 0.58408    Recall: 0.49150    F1: 0.53380    F2: 0.5075</code></pre>
 
 </div>
 </div>
@@ -11943,12 +11968,12 @@ Total predictions: 15000    True positives:  728    False positives:  907    Fal
 <p>Tuning the parameters of an algorithm is the <em>art</em> of choosing the right values in order to allow the model to get its best performance. If you do not do this well your model will underperform and you will have worse results than you could.</p>
 <p>In this case I optimized AdaBoost using the built-in sklearn function GridSearchCV. In particular I did the grid search on</p>
 <p><em>learning_rate</em></p>
-<p>[0.1, 0.2, 0.3, 0.5, 0.7, <strong>0.9</strong>, 1, 2,3, 5, 10]</p>
+<p>[0.1, 0.2, 0.3, 0.5, 0.7,0.8, 0.9, 1, <strong>2</strong>,3, 5, 10]</p>
 <p>and <em>n_estimators</em></p>
-<p>[1,5,8,10,12, 14, <strong>15</strong>, 16,50,100,1000, 2000].</p>
+<p>[1,5,8,10,11, 12, <strong>13</strong>, 14, 15, 16, 17, 18,50,100,1000, 2000].</p>
 <p>Moreover I used  <em>F1</em> as the scoring metric and 10 folds for the stratified cross-validating in the GridSearch.</p>
-<p>The results indicated <strong>0.9</strong> and <strong>15</strong> and the best parameters for <em>learning_rate</em> and <em>n_estimators</em> respectively.</p>
-<p>I obtained this tuning using the initial selection of features. Later, with my final selection, I tried to re-tune, but the performance did not improve, therefore I kept the choices above.</p>
+<p>The results indicated <strong>2</strong> and <strong>13</strong> and the best parameters for <em>learning_rate</em> and <em>n_estimators</em> respectively.</p>
+<p>I obtained this tuning using the final selection of features.</p>
 
 </div>
 </div>
@@ -11971,8 +11996,8 @@ Total predictions: 15000    True positives:  728    False positives:  907    Fal
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong> ANSWER </strong></p>
 <p>Validation is the process of veryfing that your model works well (i.e., has good performance) outside the training set. The classic mistake is to over fit. This means your model will have very good performance in a training set, but once tested in out-of-sample or new data it will have poor performance. This would mean that the model nows very well the training set, but is not capable of handling new situations.</p>
-<p>In my case I used 2 approaches for cross validation. First and foremost, I used the <em>tester.py</em> code to infer performance. This code applied a Shuffled Stratified K Fold with multiple re-sampling. This implies repeating the process of randomly picking a sample sub-set from the data within strata (i.e., guaranteeing that POIs will be included) for training and testing performance on the left over data.</p>
-<p>The other related approach was to built-in the GridSearchCV. This function, in doing the gridseach applies the cross-validation with Stratified K-fold, for which I select 10. This also chooses the best parameters form dividing the sample in stratified folds and traiing in one set and computing performance in another set.</p>
+<p>In my case I used 2 approaches for cross validation. First and foremost, I used the <em>tester.py</em> code to infer performance. This code applied a Shuffled Stratified K Fold with multiple re-sampling (see <a href="http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html">here</a>). This implies repeating the process of randomly picking a sample sub-set from the data within strata (i.e., guaranteeing that POIs will be included) for training and testing performance on the left over data. Because this dataset contains only 18 POIs simple K-folding would not work, since there is a high chance no POI would be present in a given test set. Therefore <em>tester.py</em> repeats the process of 1000 times random shuffling and spliting with 10% testing set, where in both the training and testing sets the percentage of POIs mimics the share in the total data set.</p>
+<p>The other related approach was to built-in the GridSearchCV. This function, in doing the gridseach applies the cross-validation with Stratified K-fold, for which I select 10. This also chooses the best parameters form dividing the sample in stratified folds and traiing in one set and computing performance in another set. The stratification also guarantees the presence of POIs in both the training and testing sets.</p>
 
 </div>
 </div>
@@ -11996,16 +12021,16 @@ Total predictions: 15000    True positives:  728    False positives:  907    Fal
 <p><strong> ANSWER </strong></p>
 <p>The final model had the performance:</p>
 
-<pre><code>Accuracy: 0.88780    Precision: 0.61444    Recall: 0.42550    F1: 0.50281    F2: 0.45338
+<pre><code>Accuracy: 0.87700    Precision: 0.58264    Recall: 0.49000    F1: 0.53232    F2: 0.50609
 Total predictions: 15000    True positives:  851    False positives:  534    False negatives: 1149    True negatives: 12466
 
 </code></pre>
 <p><em>Accuracy</em>:</p>
 <p>Accuracy is the rate in which the model gives right predictions, i.e., it compares the predicted label with the real label. It means that the model is right 88% of the time. It is a general metric for performance which is quite informative if the labels are close to even split. In this case however, there are only 18 POIs in the 143 valid observations. That means, for example, that if you would if you classify all persons as non-POIs, your accuracy would be 87.4. Does this model this better than that!</p>
 <p><em>Precision</em>:</p>
-<p>Precision is the rate to which the POIs identification are correct, i.e, once a person is classified as POI, this is correct 62% of the time. This gives an indication of how much "trust" you can give to a result from a model. It is the rate of true positive over positive classifications.</p>
+<p>Precision is the rate to which the POIs identification are correct, i.e, once a person is classified as POI, this is correct 58% of the time. This gives an indication of how much "trust" you can give to a result from a model. It is the rate of true positive over positive classifications.</p>
 <p><em>Recall</em>:</p>
-<p>Recall is the rate to which POIs are "caught" by the model, i.e., once a person is a POI, the model correctly label her as a POI in 42% of the time. This gives an indication of the power of the model. It is the rate of classification as POI over all classifications received by POIs.</p>
+<p>Recall is the rate to which POIs are "caught" by the model, i.e., once a person is a POI, the model correctly label her as a POI in 49% of the time. This gives an indication of the power of the model. It is the rate of classification as POI over all classifications received by POIs.</p>
 <p><em>F1</em>:</p>
 <p>F1 combines the Precision with Recall. It is  way to average Precision and Recall, trying to improve the best of both!</p>
 

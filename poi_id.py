@@ -7,13 +7,15 @@ sys.path.append("./tools/") # use local folder due to github repo
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
+from auxiliary_functions  import *
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
 ### The first feature must be "poi".
-features_list = ['poi', 'exercised_stock_options', 'restricted_stock',
-                 'shared_receipt_with_poi', 'expenses', 'other',
-                 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']
+
+features_list = ['poi', 'exercised_stock_options', 'bonus', 'expenses', 'other',
+                 'share_shared_receipt_with_poi', 'share_from_this_person_to_poi']#
+
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -23,18 +25,9 @@ with open("final_project_dataset.pkl", "r") as data_file:
 data_dict.pop('TOTAL',0)
 data_dict.pop('THE TRAVEL AGENCY IN THE PARK',0)
 data_dict.pop('LOCKHART EUGENE E',0)
+fix_shifted_persons(data_dict)
 
 ### Task 3: Create new feature(s)
-def convert_to_share(data, abs_var_name, base_var_name, new_var_name):
-    for person in data.keys():
-        if data[person][abs_var_name] == "NaN" or data[person][base_var_name] == "NaN":
-            data[person][new_var_name] = "NaN"
-        else:
-            data[person][new_var_name] = float(data[person][abs_var_name]) / float(data[person][base_var_name])
-
-    return data
-
-
 data_dict = convert_to_share(data_dict, 'shared_receipt_with_poi', 'to_messages', 'share_shared_receipt_with_poi')
 data_dict = convert_to_share(data_dict, 'from_this_person_to_poi', 'from_messages', 'share_from_this_person_to_poi')
 data_dict = convert_to_share(data_dict, 'from_poi_to_this_person', 'to_messages', 'share_from_poi_to_this_person')
@@ -52,7 +45,7 @@ labels, features = targetFeatureSplit(data)
 ## this is the best option:
 
 from sklearn.ensemble import AdaBoostClassifier
-clf = AdaBoostClassifier(learning_rate = 0.9, n_estimators = 15)
+clf = AdaBoostClassifier(learning_rate = 2, n_estimators = 13)
 
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
